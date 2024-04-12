@@ -4,6 +4,7 @@ description: Flutter plugin for launching a URL. Supports
 repository: https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher
 issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+url_launcher%22
 version: 6.2.5
+publish_to: none
 
 environment:
   sdk: ">=3.2.0 <4.0.0"
@@ -28,7 +29,11 @@ flutter:
 dependencies:
   flutter:
     sdk: flutter
-  url_launcher_android: ^6.2.0
+  url_launcher_android:
+    git:
+      url: https://github.com/umbrellait-timur-khismatullin/packages.git
+      path: packages/url_launcher/url_launcher_android
+#      ref: e5e1aa86dbfab5332f9d9814a7f15ff5a57d26b5
   url_launcher_ios: ^6.2.0
   # Allow either the pure-native or Dart/native hybrid versions of the desktop
   # implementations, as both are compatible.

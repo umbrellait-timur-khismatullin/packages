@@ -7,6 +7,9 @@ import 'dart:async';
 // PreferredLaunchMode is hidden to prevent accidentally using it in APIs at
 // this layer. If it is ever needed in this file, it should be imported
 // separately with a prefix.
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart'
     hide PreferredLaunchMode;
 
@@ -41,6 +44,7 @@ Future<bool> launchUrl(
   LaunchMode mode = LaunchMode.platformDefault,
   WebViewConfiguration webViewConfiguration = const WebViewConfiguration(),
   String? webOnlyWindowName,
+  Brightness? statusBarBrightness,
 }) async {
   if ((mode == LaunchMode.inAppWebView ||
           mode == LaunchMode.inAppBrowserView) &&
@@ -48,7 +52,19 @@ Future<bool> launchUrl(
     throw ArgumentError.value(url, 'url',
         'To use an in-app web view, you must provide an http(s) URL.');
   }
-  return UrlLauncherPlatform.instance.launchUrl(
+
+  /// [true] so that ui is automatically computed if [statusBarBrightness] is set.
+  bool previousAutomaticSystemUiAdjustment = true;
+  if (statusBarBrightness != null &&
+      defaultTargetPlatform == TargetPlatform.iOS) {
+    previousAutomaticSystemUiAdjustment =
+        WidgetsBinding.instance.renderView.automaticSystemUiAdjustment;
+    WidgetsBinding.instance.renderView.automaticSystemUiAdjustment = false;
+    SystemChrome.setSystemUIOverlayStyle(statusBarBrightness == Brightness.light
+        ? SystemUiOverlayStyle.dark
+        : SystemUiOverlayStyle.light);
+  }
+  final Future<bool> result = UrlLauncherPlatform.instance.launchUrl(
     url.toString(),
     LaunchOptions(
       mode: convertLaunchMode(mode),
@@ -56,6 +72,12 @@ Future<bool> launchUrl(
       webOnlyWindowName: webOnlyWindowName,
     ),
   );
+
+  if (statusBarBrightness != null) {
+    WidgetsBinding.instance.renderView.automaticSystemUiAdjustment =
+        previousAutomaticSystemUiAdjustment;
+  }
+  return result;
 }
 
 /// Checks whether the specified URL can be handled by some app installed on the
